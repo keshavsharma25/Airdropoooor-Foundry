@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../contracts/YourContract.sol";
 import "./DeployHelpers.s.sol";
 
 contract DeployScript is ScaffoldETHDeploy {
@@ -15,13 +14,15 @@ contract DeployScript is ScaffoldETHDeploy {
             );
         }
         vm.startBroadcast(deployerPrivateKey);
-        YourContract yourContract =
+
+        /* YourContract yourContract =
             new YourContract(vm.addr(deployerPrivateKey));
         console.logString(
             string.concat(
                 "YourContract deployed at: ", vm.toString(address(yourContract))
             )
-        );
+        ); */
+
         vm.stopBroadcast();
 
         /**
