@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/prettier": "2",
-    "@types/qrcode": "1"
+    "@types/qrcode": "1",
+    "erc721a": "^4.3.0"
   }
 }
