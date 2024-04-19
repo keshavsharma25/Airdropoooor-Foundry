@@ -3,71 +3,77 @@ pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IERC4907} from "./interfaces/IERC4907.sol";
+import {ERC4907A} from "erc721a/contracts/extensions/ERC4907A.sol";
+import {IERC4907A} from "erc721a/contracts/extensions/IERC4907A.sol";
 import {ERC721A} from "erc721a/contracts/ERC721A.sol";
+import {IERC721A} from "erc721a/contracts/IERC721A.sol";
+import {ERC721ABurnable} from "erc721a/contracts/extensions/ERC721ABurnable.sol";
 
 /* ######################################################################### */
 /*                                Airdropoooor                               */
 /* ######################################################################### */
-contract Airdropoooor is ERC721A, IERC4907, Ownable {
-    struct UserInfo {
-        address user;
-        uint256 expires;
-    }
-
-    string public logoURI;
-
-    mapping(uint256 => UserInfo) private _users;
-
-    uint256 immutable DEADLINE_TIMESTAMP;
+contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
+    address public immutable MAINTAINER_ADDRESS;
 
     constructor(
         string memory _name,
         string memory _symbol,
-        string memory _logo,
         address _owner,
         address _maintainer,
-        uint256 _deadlineTimestamp,
         uint256 _noAirdrops
     ) ERC721A(_name, _symbol) Ownable(_owner) {
-        DEADLINE_TIMESTAMP = _deadlineTimestamp;
-        logoURI = _logo;
-
+        MAINTAINER_ADDRESS = _maintainer;
         _safeMint(_maintainer, _noAirdrops);
     }
 
     /* ----------------------------- public ----------------------------- */
 
-    function setUser(uint256 tokenId, address user, uint64 expires) public {
-        require(
-            _isApprovedOrOwner(msg.sender, tokenId),
-            "ERC4907: transfer caller is not owner nor approved"
-        );
-        UserInfo storage info = _users[tokenId];
-        info.user = user;
-        info.expires = DEADLINE_TIMESTAMP;
-        emit UpdateUser(tokenId, user, expires);
-    }
-
-    function userOf(uint256 tokenId) public view returns (address) {
-        if (uint256(_users[tokenId].expires) >= block.timestamp) {
-            return _users[tokenId].user;
-        } else {
-            return address(0);
-        }
-    }
-
-    function userExpires(uint256 _tokenId) public view returns (uint256) {
-        return _users[_tokenId].expires;
-    }
-
     function getAbbrvTBA(
         uint256 _tokenId
     ) public view returns (string memory) {}
 
+    /* ---------------------------- override ---------------------------- */
+
+    function _safeMint(
+        address to,
+        uint256 quantity
+    ) internal override onlyOwner {
+        super._safeMint(to, quantity);
+    }
+
+    function burn(uint256 _tokenId) public override {
+        require(
+            msg.sender == MAINTAINER_ADDRESS,
+            "Only MAINTAINER can burn em!"
+        );
+        super.burn(_tokenId);
+    }
+
+    function setUser(
+        uint256 tokenId,
+        address user,
+        uint64 expires
+    ) public override {
+        require(
+            msg.sender == MAINTAINER_ADDRESS,
+            "User can only be set by Maintainer contract."
+        );
+
+        super.setUser(tokenId, user, expires);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC4907A, ERC721A, IERC721A) returns (bool) {
+        return
+            interfaceId == type(IERC4907A).interfaceId ||
+            interfaceId == type(IERC721A).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
     function tokenURI(
         uint256 _tokenId
-    ) public view override returns (string memory) {
+    ) public view override(ERC721A, IERC721A) returns (string memory) {
         return
             string.concat(
                 '<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">',
@@ -88,29 +94,5 @@ contract Airdropoooor is ERC721A, IERC4907, Ownable {
                 "</defs>",
                 "</svg>"
             );
-    }
-
-    /* ----------------------------- internal ---------------------------- */
-
-    function _isApprovedOrOwner(
-        address addr,
-        uint256 tokenId
-    ) internal view returns (bool) {
-        address approvedAddr = getApproved(tokenId);
-
-        if (owner() == addr || approvedAddr == addr) {
-            return true;
-        }
-        return false;
-    }
-
-    /* ---------------------------- override ---------------------------- */
-
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override returns (bool) {
-        return
-            interfaceId == type(IERC4907).interfaceId ||
-            super.supportsInterface(interfaceId);
     }
 }
