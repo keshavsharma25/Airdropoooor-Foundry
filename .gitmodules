@@ -10,3 +10,6 @@
 [submodule "packages/foundry/lib/erc6551"]
 	path = packages/foundry/lib/erc6551
 	url = https://github.com/erc6551/reference
+[submodule "packages/foundry/lib/erc721a"]
+	path = packages/foundry/lib/erc721a
+	url = https://github.com/chiru-labs/ERC721A/
