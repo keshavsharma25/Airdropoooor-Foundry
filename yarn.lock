@@ -1474,7 +1474,6 @@ __metadata:
     "@types/qrcode": 1
     dotenv: ~16.3.1
     envfile: ~6.18.0
-    erc721a: ^4.3.0
     ethers: ~5.7.1
     prettier: ~2.8.8
     qrcode: ~1.5.3
@@ -4377,13 +4376,6 @@ __metadata:
   bin:
     envfile: bin.cjs
   checksum: 3a3762994d7b84ccf0293c1269cdfa5ea8971bdbbf7e3571fb686a6415eee2029e43d3faf36ed4222a83eaaf38fbc4fa37b3f50b77ea417ca35561e0e54059c1
-  languageName: node
-  linkType: hard
-
-"erc721a@npm:^4.3.0":
-  version: 4.3.0
-  resolution: "erc721a@npm:4.3.0"
-  checksum: deede7094e88daa1ecc11f1b114fb10db3a6b0557087e8f0ceca31eaaec643d75028d308f3a97e615cd1a09087095d61196ac938b73f6d56c222c4cf4a1430b8
   languageName: node
   linkType: hard
 
