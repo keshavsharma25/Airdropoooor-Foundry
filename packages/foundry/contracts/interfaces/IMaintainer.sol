@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import { IERC721Receiver } from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
-
 interface IMaintainer {
     error OwnableInvalidOwner(address owner);
     error OwnableUnauthorizedAccount(address account);
