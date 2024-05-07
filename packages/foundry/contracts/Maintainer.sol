@@ -52,11 +52,16 @@ contract Maintainer is Ownable, ERC721Holder {
         _populateTbaAirdropInfo(_airdropInfo);
     }
 
+    /* -------------------------------- receive ------------------------------- */
+
+    receive() external payable {}
+    fallback() external payable {}
+
     /* ------------------------------- public ------------------------------ */
 
-    function fundAirdropInTBAs() public onlyOwner {
+    function fundAirdropInTBAs() public payable onlyOwner {
         require(
-            contractTokenBalance() == totalAirdropAmount,
+            contractTokenBalance() >= totalAirdropAmount,
             "Not enough balance in Maintainer to fund TBAs!"
         );
 
@@ -76,17 +81,15 @@ contract Maintainer is Ownable, ERC721Holder {
 
             IAccount(tba).setAirdropTokenAddress(AIRDROP_TOKEN_ADDRESS);
 
-            IERC20(AIRDROP_TOKEN_ADDRESS).transferFrom(
-                address(this),
-                tba,
-                _tbaAirdropInfo[i].amount
-            );
-
             IERC4907A(AIRDROPOOOOR_ADDRESS).setUser(
                 i,
                 _tbaAirdropInfo[i].toAddress,
                 uint64(DEADLINE_TIMESTAMP)
             );
+
+            uint256 tbaAmount = _tbaAirdropInfo[i].amount;
+
+            IERC20(AIRDROP_TOKEN_ADDRESS).transfer(tba, tbaAmount);
         }
     }
 
