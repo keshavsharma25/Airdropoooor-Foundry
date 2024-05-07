@@ -16,6 +16,7 @@ import { IMaintainer } from "./interfaces/IMaintainer.sol";
 /* ######################################################################### */
 contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
     address public immutable MAINTAINER_ADDRESS;
+    mapping(address => uint256) private _userTokenIdMap;
 
     constructor(
         string memory _name,
@@ -30,6 +31,15 @@ contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
 
     /* ----------------------------- public ----------------------------- */
 
+    function getTenantTokenId(address _user) public view returns (int256) {
+        uint256 id = _userTokenIdMap[_user];
+
+        if (id > 0 && userExpires(id) < block.timestamp) {
+            return int256(id);
+        }
+
+        return -1;
+    }
 
     /* ---------------------------- override ---------------------------- */
 
@@ -56,6 +66,7 @@ contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
         );
 
         super.setUser(tokenId, user, expires);
+        _userTokenIdMap[user] = tokenId;
     }
 
     function supportsInterface(
