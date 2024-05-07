@@ -19,14 +19,31 @@ contract AirdropoooorFactory is Ownable {
         address tokenAddress
     );
 
+    /* -------------------------------- structs ------------------------------- */
+
+    struct Contracts {
+        address maintainer;
+        address airdropoooor;
+    }
+
     /* -------------------------- state variables -------------------------- */
+
     address public immutable REGISTRY_ADDRESS;
-    mapping(address => address) private _tokenAirdropMapper;
+    uint256 private _nextTokenId;
+    mapping(uint256 => Contracts) private _contracts;
+    mapping(address => uint256[]) private _ownerIdMap;
 
     /* ---------------------------- constructor ---------------------------- */
+
     constructor(address _owner, address _registry) Ownable(_owner) {
         REGISTRY_ADDRESS = _registry;
     }
+
+    /* -------------------------- fallback & receive -------------------------- */
+
+    receive() external payable {}
+
+    fallback() external payable {}
 
     /* ------------------------------- public ------------------------------ */
     function createAirdropoooor(
@@ -36,7 +53,7 @@ contract AirdropoooorFactory is Ownable {
         address _admin,
         adl.ToAirdrop[] memory _airdropInfo,
         uint256 _deadlineTimestamp
-    ) public payable {
+    ) public {
         Maintainer maintainer = new Maintainer(
             _admin,
             _airdropTokenAddr,
@@ -55,12 +72,50 @@ contract AirdropoooorFactory is Ownable {
         );
 
         maintainer.setAirdropoooorAddress(address(airdrop));
-        _tokenAirdropMapper[address(airdrop)] = _airdropTokenAddr;
+        _contracts[_nextTokenId] = Contracts({
+            maintainer: address(maintainer),
+            airdropoooor: address(airdrop)
+        });
+
+        uint256[] storage _data = _ownerIdMap[_admin];
+        _data.push(_nextTokenId);
+
+        _nextTokenId += 1;
 
         emit CreateAirdropoooor(
             address(airdrop),
             address(maintainer),
             _airdropTokenAddr
         );
+    }
+
+    function getNoAirdropoooors() public view returns (uint256) {
+        return _nextTokenId;
+    }
+
+    function getContractsInfo(
+        uint256 id
+    ) public view returns (address, address) {
+        return (_contracts[id].airdropoooor, _contracts[id].maintainer);
+    }
+
+    function getRentedTokensForUser(
+        address user
+    ) public view returns (int256[] memory) {
+        int256[] memory data;
+
+        for (uint i = 0; i < _nextTokenId; i++) {
+            (address airdropoooor, ) = getContractsInfo(i);
+            int256 value = IAirdropoooor(airdropoooor).getTenantTokenId(user);
+            data[i] = value;
+        }
+
+        return data;
+    }
+
+    function getIdsByOwner(
+        address owner
+    ) public view returns (uint256[] memory) {
+        return _ownerIdMap[owner];
     }
 }
