@@ -30,6 +30,7 @@ contract Account is ERC165, IERC1271, IERC6551Account {
     address public AIRDROP_TOKEN_ADDRESS;
 
     /* ------------------------------ receive ------------------------------ */
+
     receive() external payable {}
 
     /* ----------------------------- modifiers ----------------------------- */
@@ -77,7 +78,7 @@ contract Account is ERC165, IERC1271, IERC6551Account {
                 balance
             );
 
-            IMaintainer(owner()).setIsClaimed(tokenId);
+            IMaintainer(payable(owner())).setIsClaimed(tokenId);
             IERC721A(tokenContract).transferFrom(owner(), user(), tokenId);
         }
     }
@@ -88,11 +89,7 @@ contract Account is ERC165, IERC1271, IERC6551Account {
         );
 
         if (!isValidAirdrop()) {
-            IERC20(AIRDROP_TOKEN_ADDRESS).transferFrom(
-                address(this),
-                msg.sender,
-                balance
-            );
+            IERC20(AIRDROP_TOKEN_ADDRESS).transfer(msg.sender, balance);
         }
     }
 
