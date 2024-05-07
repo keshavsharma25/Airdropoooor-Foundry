@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AirdropoooorLib as adl} from "./lib/AirdropoooorLib.sol";
-import {Maintainer} from "./Maintainer.sol";
-import {Airdropoooor} from "./Airdropoooor.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { AirdropoooorLib as adl } from "./lib/AirdropoooorLib.sol";
+import { Maintainer } from "./Maintainer.sol";
+import { Airdropoooor } from "./Airdropoooor.sol";
+import { IAirdropoooor } from "./interfaces/IAirdropoooor.sol";
 
 /* ######################################################################### */
 /*                            AirdropoooorFactory                            */
 /* ######################################################################### */
 contract AirdropoooorFactory is Ownable {
     /* ------------------------------- events ------------------------------ */
+
     event CreateAirdropoooor(
         address indexed airdropoooor,
         address maintainer,

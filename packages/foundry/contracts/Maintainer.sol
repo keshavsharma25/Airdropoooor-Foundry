@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
-import {IERC6551Registry} from "erc6551/interfaces/IERC6551Registry.sol";
-import {IERC4907A} from "erc721a/contracts/interfaces/IERC4907A.sol";
-import {IERC721A} from "erc721a/contracts/interfaces/IERC721A.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC721Holder } from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import { IERC6551Registry } from "erc6551/interfaces/IERC6551Registry.sol";
+import { IERC4907A } from "erc721a/contracts/interfaces/IERC4907A.sol";
+import { IERC721A } from "erc721a/contracts/interfaces/IERC721A.sol";
 
-import {AirdropoooorLib as adl} from "./lib/AirdropoooorLib.sol";
-import {Account} from "./Account.sol";
-import {IAccount} from "./interfaces/IAccount.sol";
+import { AirdropoooorLib as adl } from "./lib/AirdropoooorLib.sol";
+import { Account } from "./Account.sol";
+import { IAccount } from "./interfaces/IAccount.sol";
+import { IAirdropoooor } from "./interfaces/IAirdropoooor.sol";
 
 /* ######################################################################### */
 /*                                 Maintainer                                */

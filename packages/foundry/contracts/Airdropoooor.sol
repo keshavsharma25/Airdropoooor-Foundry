@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {ERC4907A} from "erc721a/contracts/extensions/ERC4907A.sol";
-import {IERC4907A} from "erc721a/contracts/extensions/IERC4907A.sol";
-import {ERC721A} from "erc721a/contracts/ERC721A.sol";
-import {IERC721A} from "erc721a/contracts/IERC721A.sol";
-import {ERC721ABurnable} from "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
+import { ERC4907A } from "erc721a/contracts/extensions/ERC4907A.sol";
+import { IERC4907A } from "erc721a/contracts/extensions/IERC4907A.sol";
+import { ERC721A } from "erc721a/contracts/ERC721A.sol";
+import { IERC721A } from "erc721a/contracts/IERC721A.sol";
+import { ERC721ABurnable } from "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import { IMaintainer } from "./interfaces/IMaintainer.sol";
 
 /* ######################################################################### */
 /*                                Airdropoooor                               */
@@ -34,10 +36,7 @@ contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
 
     /* ---------------------------- override ---------------------------- */
 
-    function _safeMint(
-        address to,
-        uint256 quantity
-    ) internal override onlyOwner {
+    function _safeMint(address to, uint256 quantity) internal override {
         super._safeMint(to, quantity);
     }
 
