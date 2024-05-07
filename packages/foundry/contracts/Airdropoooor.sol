@@ -30,9 +30,6 @@ contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
 
     /* ----------------------------- public ----------------------------- */
 
-    function getAbbrvTBA(
-        uint256 _tokenId
-    ) public view returns (string memory) {}
 
     /* ---------------------------- override ---------------------------- */
 
