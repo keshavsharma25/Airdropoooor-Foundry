@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "./DeployHelpers.s.sol";
+import {ERC6551Registry} from "erc6551/ERC6551Registry.sol";
+import {AirdropoooorFactory} from "../contracts/AirdropoooorFactory.sol";
 
 contract DeployScript is ScaffoldETHDeploy {
     error InvalidPrivateKey(string);
@@ -15,13 +17,25 @@ contract DeployScript is ScaffoldETHDeploy {
         }
         vm.startBroadcast(deployerPrivateKey);
 
-        /* YourContract yourContract =
-            new YourContract(vm.addr(deployerPrivateKey));
+        ERC6551Registry registry = new ERC6551Registry();
+        AirdropoooorFactory factory = new AirdropoooorFactory(
+            vm.addr(deployerPrivateKey),
+            address(registry)
+        );
+
         console.logString(
             string.concat(
-                "YourContract deployed at: ", vm.toString(address(yourContract))
+                "The Registry Address is: ",
+                vm.toString(address(registry))
             )
-        ); */
+        );
+
+        console.logString(
+            string.concat(
+                "The AirdropooooorFactory Address is: ",
+                vm.toString(address(factory))
+            )
+        );
 
         vm.stopBroadcast();
 
