@@ -55,6 +55,19 @@ contract Airdropoooor is ERC4907A, ERC721ABurnable, Ownable {
         super.burn(_tokenId);
     }
 
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal override {
+        require(
+            from == MAINTAINER_ADDRESS || from == address(0),
+            "Soulbound Token! Cannot transfer..."
+        );
+        super._beforeTokenTransfers(from, to, startTokenId, quantity);
+    }
+
     function setUser(
         uint256 tokenId,
         address user,
