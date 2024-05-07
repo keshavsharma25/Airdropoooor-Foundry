@@ -94,6 +94,10 @@ contract Maintainer is Ownable, ERC721Holder {
     }
 
     function withdrawFromTBAs() public onlyOwner {
+        require(
+            block.timestamp > DEADLINE_TIMESTAMP,
+            "Deadline not yet reached!"
+        );
         for (uint256 i = 0; i < totalAirdrops; i++) {
             address tba = getTBA(i);
 
@@ -106,6 +110,7 @@ contract Maintainer is Ownable, ERC721Holder {
 
                 TbaAcc.withdraw();
                 _tbaAirdropInfo[i].isWithdrawn = true;
+                IAirdropoooor(AIRDROPOOOOR_ADDRESS).burn(i);
             }
         }
     }
@@ -152,12 +157,10 @@ contract Maintainer is Ownable, ERC721Holder {
         _approveAirdropoooor(_tokenId);
     }
 
-    function getAirdropTokenAddress() public view returns (address) {
-        return AIRDROP_TOKEN_ADDRESS;
-    }
-
-    function getTotalAirdropAmount() public view returns (uint256) {
-        return totalAirdropAmount;
+    function getAirdropInfo(
+        uint256 _tokenId
+    ) public view returns (adl.TbaToAirdrop memory) {
+        return _tbaAirdropInfo[_tokenId];
     }
 
     function getAirdropAmount(uint256 _tokenId) public view returns (uint256) {
@@ -172,9 +175,13 @@ contract Maintainer is Ownable, ERC721Holder {
                 IMPLEMENTATION_ADDRESS,
                 bytes32(0),
                 block.chainid,
-                AIRDROP_TOKEN_ADDRESS,
+                AIRDROPOOOOR_ADDRESS,
                 _tokenId
             );
+    }
+
+    function isClaimed(uint256 _tokenId) public view returns (bool) {
+        return _tbaAirdropInfo[_tokenId].isClaimed;
     }
 
     function contractTokenBalance() public view returns (uint256) {
