@@ -51,13 +51,20 @@ contract AirdropoooorFactory is Ownable {
         string calldata _symbol,
         address _airdropTokenAddr,
         address _admin,
-        adl.ToAirdrop[] memory _airdropInfo,
+        address[] memory _airdropAddresses,
+        uint256[] memory _airdropAmounts,
         uint256 _deadlineTimestamp
     ) public {
+        require(
+            _airdropAddresses.length == _airdropAmounts.length,
+            "No. of Airdrop Addresses & Amounts not equal!"
+        );
+
         Maintainer maintainer = new Maintainer(
             _admin,
             _airdropTokenAddr,
-            _airdropInfo,
+            _airdropAddresses,
+            _airdropAmounts,
             _deadlineTimestamp,
             REGISTRY_ADDRESS,
             address(this)
@@ -68,7 +75,7 @@ contract AirdropoooorFactory is Ownable {
             _symbol,
             _admin,
             address(maintainer),
-            _airdropInfo.length
+            _airdropAddresses.length
         );
 
         maintainer.setAirdropoooorAddress(address(airdrop));

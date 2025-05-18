@@ -5,14 +5,16 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC721Holder } from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
-import { IERC6551Registry } from "erc6551/interfaces/IERC6551Registry.sol";
-import { IERC4907A } from "erc721a/contracts/interfaces/IERC4907A.sol";
-import { IERC721A } from "erc721a/contracts/interfaces/IERC721A.sol";
+import { IERC6551Registry } from "../lib/erc6551/src/interfaces/IERC6551Registry.sol";
+import { IERC4907A } from "../lib/erc721a/contracts/interfaces/IERC4907A.sol";
+import { IERC721A } from "../lib/erc721a/contracts/interfaces/IERC721A.sol";
 
 import { AirdropoooorLib as adl } from "./lib/AirdropoooorLib.sol";
 import { Account } from "./Account.sol";
 import { IAccount } from "./interfaces/IAccount.sol";
 import { IAirdropoooor } from "./interfaces/IAirdropoooor.sol";
+
+import { console } from "forge-std/console.sol";
 
 /* ######################################################################### */
 /*                                 Maintainer                                */
@@ -39,7 +41,8 @@ contract Maintainer is Ownable, ERC721Holder {
     constructor(
         address _owner,
         address _airdropTokenAddr,
-        adl.ToAirdrop[] memory _airdropInfo,
+        address[] memory _airdropAddresses,
+        uint256[] memory _airdropAmounts,
         uint256 _deadlineTimestamp,
         address _registry,
         address _factory
@@ -49,7 +52,7 @@ contract Maintainer is Ownable, ERC721Holder {
         FACTORY_ADDRESS = _factory;
         DEADLINE_TIMESTAMP = _deadlineTimestamp;
 
-        _populateTbaAirdropInfo(_airdropInfo);
+        _populateTbaAirdropInfo(_airdropAddresses, _airdropAmounts);
     }
 
     /* -------------------------------- receive ------------------------------- */
@@ -79,7 +82,9 @@ contract Maintainer is Ownable, ERC721Holder {
                 i
             );
 
-            IAccount(tba).setAirdropTokenAddress(AIRDROP_TOKEN_ADDRESS);
+            IAccount(payable(tba)).setAirdropTokenAddress(
+                AIRDROP_TOKEN_ADDRESS
+            );
 
             IERC4907A(AIRDROPOOOOR_ADDRESS).setUser(
                 i,
@@ -106,7 +111,7 @@ contract Maintainer is Ownable, ERC721Holder {
             }
 
             if (tbaTokenBalance(i) > 0) {
-                IAccount TbaAcc = IAccount(tba);
+                IAccount TbaAcc = IAccount(payable(tba));
 
                 TbaAcc.withdraw();
                 _tbaAirdropInfo[i].isWithdrawn = true;
@@ -199,26 +204,27 @@ contract Maintainer is Ownable, ERC721Holder {
     /* ------------------------------ private ------------------------------ */
 
     function _populateTbaAirdropInfo(
-        adl.ToAirdrop[] memory _airdropInfo
+        address[] memory _airdropAddresses,
+        uint256[] memory _airdropAmounts
     ) private {
         uint256 sumAirdropAmount = 0;
 
-        for (uint256 i = 0; i < _airdropInfo.length; i++) {
+        for (uint256 i = 0; i < _airdropAddresses.length; i++) {
             address tba = getTBA(i);
 
             _tbaAirdropInfo[i] = adl.TbaToAirdrop({
-                toAddress: _airdropInfo[i].toAddress,
+                toAddress: _airdropAddresses[i],
                 tbaAddress: tba,
-                amount: _airdropInfo[i].amount,
+                amount: _airdropAmounts[i],
                 isClaimed: false,
                 isWithdrawn: false
             });
 
-            sumAirdropAmount += _airdropInfo[i].amount;
+            sumAirdropAmount += _airdropAmounts[i];
         }
 
         totalAirdropAmount += sumAirdropAmount;
-        totalAirdrops = _airdropInfo.length;
+        totalAirdrops = _airdropAddresses.length;
     }
 
     function _approveAirdropoooor(uint256 _tokenId) private {

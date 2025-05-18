@@ -4,17 +4,15 @@ pragma solidity ^0.8.20;
 import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import { IERC1271 } from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import { IERC6551Account } from "erc6551/interfaces/IERC6551Account.sol";
-import { ERC6551AccountLib } from "erc6551/lib/ERC6551AccountLib.sol";
-import { IERC6551Registry } from "erc6551/interfaces/IERC6551Registry.sol";
+import { IERC6551Account } from "../lib/erc6551/src/interfaces/IERC6551Account.sol";
+import { ERC6551AccountLib } from "../lib/erc6551/src/lib/ERC6551AccountLib.sol";
 
-import { IERC721A } from "erc721a/contracts/IERC721A.sol";
-import { IERC4907A } from "erc721a/contracts/extensions/IERC4907A.sol";
+import { IERC721A } from "../lib/erc721a/contracts/IERC721A.sol";
+import { IERC4907A } from "../lib/erc721a/contracts/extensions/IERC4907A.sol";
 
-import { IAirdropoooor } from "./interfaces/IAirdropoooor.sol";
 import { IMaintainer } from "./interfaces/IMaintainer.sol";
 
 /* ######################################################################### */
@@ -27,11 +25,12 @@ contract Account is ERC165, IERC1271, IERC6551Account {
     /* -------------------------- state variables -------------------------- */
     uint256 public state;
 
-    address public AIRDROP_TOKEN_ADDRESS;
+    address private airdropTokenAddress;
 
     /* ------------------------------ receive ------------------------------ */
 
     receive() external payable {}
+    fallback() external payable {}
 
     /* ----------------------------- modifiers ----------------------------- */
     modifier onlyOwner() {
@@ -46,18 +45,18 @@ contract Account is ERC165, IERC1271, IERC6551Account {
 
     /* ------------------------------- public ------------------------------ */
     function setAirdropTokenAddress(
-        address airdropTokenAddress
+        address _airdropTokenAddress
     ) public onlyOwner {
         require(
-            AIRDROP_TOKEN_ADDRESS == address(0),
+            airdropTokenAddress == address(0),
             "AIRDROP_TOKEN_ADDRESS already set once."
         );
 
-        AIRDROP_TOKEN_ADDRESS = airdropTokenAddress;
+        airdropTokenAddress = _airdropTokenAddress;
     }
 
     function redeem() public onlyUser {
-        require(AIRDROP_TOKEN_ADDRESS != address(0), "Invalid Airdrop Token");
+        require(airdropTokenAddress != address(0), "Invalid Airdrop Token");
         (uint256 chainId, address tokenContract, uint256 tokenId) = token();
 
         require(
@@ -65,14 +64,12 @@ contract Account is ERC165, IERC1271, IERC6551Account {
             string.concat("Invalid chain id:", Strings.toString(block.chainid))
         );
 
-        uint256 balance = IERC20(AIRDROP_TOKEN_ADDRESS).balanceOf(
-            address(this)
-        );
+        uint256 balance = IERC20(airdropTokenAddress).balanceOf(address(this));
 
         require(balance > 0, "No tokens available for airdrop claim.");
 
         if (msg.sender == user() && isValidAirdrop()) {
-            IERC20(AIRDROP_TOKEN_ADDRESS).transferFrom(
+            IERC20(airdropTokenAddress).transferFrom(
                 address(this),
                 msg.sender,
                 balance
@@ -84,12 +81,10 @@ contract Account is ERC165, IERC1271, IERC6551Account {
     }
 
     function withdraw() public onlyOwner {
-        uint256 balance = IERC20(AIRDROP_TOKEN_ADDRESS).balanceOf(
-            address(this)
-        );
+        uint256 balance = IERC20(airdropTokenAddress).balanceOf(address(this));
 
         if (!isValidAirdrop()) {
-            IERC20(AIRDROP_TOKEN_ADDRESS).transfer(msg.sender, balance);
+            IERC20(airdropTokenAddress).transfer(msg.sender, balance);
         }
     }
 
@@ -115,7 +110,17 @@ contract Account is ERC165, IERC1271, IERC6551Account {
     }
 
     function token() public view returns (uint256, address, uint256) {
-        return ERC6551AccountLib.token();
+        bytes memory footer = new bytes(0x60);
+
+        assembly {
+            extcodecopy(address(), add(footer, 0x20), 0x4d, 0x60)
+        }
+
+        return abi.decode(footer, (uint256, address, uint256));
+    }
+
+    function getAirdropTokenAddress() public view returns (address) {
+        return airdropTokenAddress;
     }
 
     function isValidSigner(

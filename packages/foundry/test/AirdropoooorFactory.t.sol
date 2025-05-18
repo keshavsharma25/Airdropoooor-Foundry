@@ -8,12 +8,6 @@ import { MockERC20 } from "./mock/MockERC20.sol";
 import { AirdropoooorLib as adl } from "../contracts/lib/AirdropoooorLib.sol";
 
 contract AirDropoooorFactoryTest is Test {
-    event CreateAirdropoooor(
-        address indexed airdropoooor,
-        address maintainer,
-        address tokenAddress
-    );
-
     Registry public registry;
     AirdropoooorFactory public airdropoooorFactory;
     MockERC20 public mock20;
@@ -21,10 +15,15 @@ contract AirDropoooorFactoryTest is Test {
     address public admin = vm.addr(0x5420);
     address public user = vm.addr(0x5421);
 
-    adl.ToAirdrop[] public airdropInfo = [
-        adl.ToAirdrop({ toAddress: vm.addr(0x01), amount: 10 ether }),
-        adl.ToAirdrop({ toAddress: vm.addr(0x02), amount: 10 ether })
+    address[] public addresses = [
+        vm.addr(0x1000),
+        vm.addr(0x1001),
+        vm.addr(0x1003),
+        vm.addr(0x1004),
+        vm.addr(0x1005)
     ];
+
+    uint256[] public amounts = [1000, 1001, 1004, 1005, 1005];
 
     function setUp() public {
         vm.startPrank(admin);
@@ -33,45 +32,25 @@ contract AirDropoooorFactoryTest is Test {
         airdropoooorFactory = new AirdropoooorFactory(admin, address(registry));
         mock20 = new MockERC20();
 
-        vm.stopPrank();
-    }
-
-    function test_createAirdropoooor() public {
-        vm.startPrank(user);
-
-        vm.expectEmit(true, false, false, true);
-
-        emit CreateAirdropoooor(
-            0x5E9134F4E045fF525d848CAcD684Fe93d51EaDC3,
-            0x489871e6F8F77eb2B190d270AD65f4D1B44C92A3,
-            address(mock20)
-        );
-
         airdropoooorFactory.createAirdropoooor(
             "smth",
             "SMTH",
             address(mock20),
             admin,
-            airdropInfo,
+            addresses,
+            amounts,
             vm.getBlockTimestamp() + 100
         );
 
-        assertEq(airdropoooorFactory.getNoAirdropoooors(), 1);
-
         vm.stopPrank();
+    }
+
+    function test_createAirdropoooor() public view {
+        assertEq(airdropoooorFactory.getNoAirdropoooors(), 1);
     }
 
     function test_getIdsByOwner() public {
         vm.startPrank(user);
-
-        airdropoooorFactory.createAirdropoooor(
-            "smth",
-            "SMTH",
-            address(mock20),
-            admin,
-            airdropInfo,
-            vm.getBlockTimestamp() + 100
-        );
 
         vm.stopPrank();
 

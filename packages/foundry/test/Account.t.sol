@@ -1,13 +1,14 @@
-//SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: minutes
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import { AirdropoooorLib as adl } from "../contracts/lib/AirdropoooorLib.sol";
+
 import { Maintainer } from "../contracts/Maintainer.sol";
 import { Registry } from "../contracts/Registry.sol";
+import { Account } from "../contracts/Account.sol";
+import { IAccount } from "../contracts/interfaces/IAccount.sol";
 import { AirdropoooorFactory } from "../contracts/AirdropoooorFactory.sol";
 import { Airdropoooor } from "../contracts/Airdropoooor.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { MockERC20 } from "./mock/MockERC20.sol";
 
 contract AidropoooorFactoryFixture is Test {
@@ -33,7 +34,6 @@ contract AidropoooorFactoryFixture is Test {
 
     function setUp() public virtual {
         vm.startPrank(admin);
-
         mock20 = new MockERC20();
         mock20.mint(admin, 1000 ether);
 
@@ -60,52 +60,46 @@ contract AidropoooorFactoryFixture is Test {
     }
 }
 
-contract MaintainerInitialTest is AidropoooorFactoryFixture {
+contract AccountTest is AidropoooorFactoryFixture {
+    IAccount public account;
+
     function setUp() public virtual override {
         super.setUp();
-    }
 
-    function test_constructor() public view {
-        adl.TbaToAirdrop memory tbaInfo = maintainer.getAirdropInfo(0);
-        assertEq(tbaInfo.toAddress, addresses[0]);
-        assertEq(tbaInfo.amount, amounts[0]);
-    }
-
-    function test_depositTotalAirdropAmount() public {
-        vm.startPrank(admin);
-        uint256 amount = maintainer.totalAirdropAmount();
-        mock20.approve(address(maintainer), amount);
-        maintainer.depositTotalAirdropAmount();
-        vm.stopPrank();
-
-        assertEq(
-            mock20.balanceOf(address(maintainer)),
-            maintainer.totalAirdropAmount()
-        );
-    }
-
-    function test_fundAirdropInTBAs() public {
-        vm.startPrank(admin);
-        // approve and deposit in Maintainer Contract
-        uint256 amount = maintainer.totalAirdropAmount();
-        mock20.approve(address(maintainer), amount);
-        maintainer.depositTotalAirdropAmount();
-
-        assertEq(mock20.balanceOf(address(maintainer)), amount);
-        // fund ERC20 Tokens in TBA Accounts
-        maintainer.fundAirdropInTBAs();
-        vm.stopPrank();
-
-        // assert maintainer balance should be Zero
-        assertEq(mock20.balanceOf(address(maintainer)), 0);
-
-        // assert TBA balance
         address tba = maintainer.getTBA(0);
-        uint256 balance = maintainer.getAirdropAmount(0);
-        assertEq(mock20.balanceOf(tba), balance);
+        account = IAccount(payable(tba));
     }
 
-    function testFail_withdrawFromTBAs() public {}
+    function test_token() public view {
+        (uint256 chainId, address tokenContract, uint256 tokenId) = account
+            .token();
 
-    function test_withdrawFromTBAs() public {}
+        assertEq(chainId, block.chainid);
+        assertEq(tokenContract, address(airdrop));
+        assertEq(tokenId, 0);
+    }
+
+    function test_getOwner() public view {
+        /* address maintainerAddr = address(maintainer);
+        console.log("Maintainer Address: ", maintainerAddr);
+        console.log("Token Owner Address: ", account.owner());
+
+        assertEq(account.owner(), maintainerAddr); */
+    }
+
+    function test_getUser() public {}
+
+    function test_redeemBeforeDeadlineAsUser() public {}
+
+    function testFail_redeemAfterDeadlineAsUser() public {}
+
+    function testFail_redeemBeforeDeadlineAsOwner() public {}
+
+    function testFail_redeemAfterDeadlineAsOwner() public {}
+
+    function test_withdrawAfterDeadlineAsOwner() public {}
+
+    function testFail_withdrawBeforeDeadlineAsOwner() public {}
+
+    function testFail_setAirdropTokenAddress() public {}
 }
